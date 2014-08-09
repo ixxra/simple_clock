@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import time
 import math as m
 from gi.repository import Gtk
