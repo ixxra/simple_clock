@@ -33,7 +33,6 @@ def draw(widget, cr):
         Gdk.cairo_set_source_rgba(cr, color)
         cr.fill()
 
-
     localtime = time.localtime()
 
     hour = localtime.tm_hour % 12
@@ -69,31 +68,33 @@ def draw(widget, cr):
     return False
 
 
-w = Gtk.Window()
-w.connect('delete-event', lambda w, e: Gtk.main_quit())
+def make_window(update_func=update, draw_func=draw):
+    w = Gtk.Window()
+    w.connect('delete-event', lambda w, e: Gtk.main_quit())
 
-w.set_title(time.strftime('%a %d %B %Y', time.localtime()))
-w.resize(250, 100)
+    w.set_title(time.strftime('%a %d %B %Y', time.localtime()))
+    w.resize(250, 100)
 
-da = Gtk.DrawingArea()
-da.connect('draw', draw)
-da.set_size_request(50, 50)
+    da = Gtk.DrawingArea()
+    da.connect('draw', draw_func)
+    da.set_size_request(50, 50)
 
-l = Gtk.Label()
+    l = Gtk.Label()
 
+    frame = Gtk.Frame()
+    frame.add(da)
 
-frame = Gtk.Frame()
-frame.add(da)
+    vbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+    vbox.pack_start(frame, True, True, 5)
+    vbox.pack_start(l, False, True, 5)
 
-vbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-vbox.pack_start(frame, True, True, 5)
-vbox.pack_start(l, False, True, 5)
+    w.add(vbox)
 
-w.add(vbox)
+    GLib.timeout_add_seconds(0.5, update_func, {'l':l, 'da': da})
 
-GLib.timeout_add_seconds(0.5, update, {'l':l, 'da': da})
+    return w
 
-w.show_all()
 
 if __name__ == '__main__':
+    make_window().show_all()
     Gtk.main()  
